@@ -2,7 +2,7 @@
 
 ## 9.1. Canvas (HTML)
 
-C'est un élément dans lequel il est possible de dessiner avec le langage JavaScript.
+C'est un élément rectangulaire (300x150, par défaut) où il est possible de dessiner grâce au langage JavaScript.
 
 ```html
 <canvas width="400" height="300" id="moncanvas">
@@ -10,13 +10,25 @@ C'est un élément dans lequel il est possible de dessiner avec le langage JavaS
 </canvas>
 ```
 
+> Attention: les dimensions du Canvas spécifiées via CSS ne s'appliquent qu'une fois le dessin effectué et peuvent donner une image *étirée*.
+
+La manipulation et la création de contenu requiert un *contexte de rendu*. Plusieurs peuvent être disponibles
+
+- 2D
+
+- WebGL
+
+- 3D (inspiré de OpenGL ES)
+
+- ...
+
 ### 9.1.1. Contexte 2d
 
-Pour récupérer ce contexte:
+On récupère ce contexte depuis l'élément *Canvas*:
 
 ```javascript
-let canvas = document.querySelector("#moncanvas");
-let pinceau = canvas.getContext("2d");
+var canvas = document.querySelector("#moncanvas");
+var pinceau = canvas.getContext("2d");
 ```
 
 Pour modifier le pinceau:
@@ -38,11 +50,19 @@ pinceau.strokeStyle = "green";
 
 Dessiner des formes:
 
+- Une ligne:
+
+```javascript
+pinceau.beginPath();
+pinceau.moveTo(0,0);
+pinceau.lineTo(100,100);
+pinceau.stroke();
+```
+
 - Un rectangle:
 
 ```javascript
-pinceau.fillRect(25, 25, 100, 100);
-pinceau.clearRect(45, 45, 60, 60);
+pinceau.fillRect(25, 25, 100, 100); // x,y, width, height
 pinceau.strokeRect(50, 50, 50, 50);
 ```
 
@@ -50,7 +70,10 @@ pinceau.strokeRect(50, 50, 50, 50);
 
 ```javascript
 // cercle centré en (75,75) et de rayon 50
+pinceau.beginPath();
 pinceau.arc(75,75,50,0,Math.PI*2,true); 
+pinceau.closePath();
+pinceau.fill();
 ```
 
 - Un chemin (`path`):
@@ -66,7 +89,71 @@ pinceau.stroke(); // le contour
 pinceau.fill(); // l'intérieur
 ```
 
+- Du texte (`x` et `y` sont les coordonnées du coin **inférieur gauche**):
+
+```javascript
+pinceau.font = '20pt comicsans';
+pinceau.fillStyle = 'black';
+pinceau.fillText("Texte à afficher", 100, 100); // x,y
+```
+
+Effacer une zone rectangulaire:
+
+```javascript
+// Tout le contenu du canvas
+pinceau.clearRect(0, 0, canvas.width, canvas.height);
+```
+
 ### 9.1.2. Contexte webgl
+
+### 9.1.3. Animation
+
+Il suffit de prévoir une fonction principale de dessin:
+
+```javascript
+function draw() {
+  // dessiner du contenu de l'interface
+}
+```
+
+Puis utiliser une des 2 méthodes suivantes:
+
+- appeler périodiquement cette fonction:
+
+```javascript
+setInterval(draw, 10); // toutes les 10ms
+```
+
+- laisser le navigateur gérer le rafraichissement:
+
+```javascript
+requestAnimationFrame(draw);
+```
+
+### 9.1.4. Gestion d'événements
+
+Il faut demander à l'élément approprié (*Canvas*, `document`...) d'écouter l'événement en question et d'appeler une certaine fonction le cas échéant:
+
+```javascript
+canvas.addEventListener('mousedown', gestionAppuiSouris, false);
+document.addEventListener('keydown', gestionAppuiTouche);
+```
+
+La fonction appelée reçoit automatiquement l'événement en paramètre:
+
+```javascript
+function gestionAppuiSouris(event) {
+  // Coordonnées du clic
+  let x = event.offsetX;
+  let y = event.offsetY;
+}
+
+function gestionAppuiTouche(event) {
+  if (event.key == "Right" || event.key == "ArrowRight") {
+    // Touche droite
+  }
+}
+```
 
 ## 9.2. SVG
 
